@@ -2,12 +2,12 @@
 // See LICENSE.txt for license information.
 
 import React, {PureComponent} from 'react';
-import {Text} from 'react-native';
 import PropTypes from 'prop-types';
 import Button from 'react-native-button';
 
 import {preventDoubleTap} from 'app/utils/tap';
 import {makeStyleSheetFromTheme} from 'app/utils/theme';
+import Markdown from 'app/components/markdown';
 
 export default class ActionButton extends PureComponent {
     static propTypes = {
@@ -34,7 +34,19 @@ export default class ActionButton extends PureComponent {
                 containerStyle={style.button}
                 onPress={this.handleActionPress}
             >
-                <Text style={style.text}>{name}</Text>
+                <Markdown
+                    isEdited={false}
+                    isReplyPost={false}
+                    disableHashtags={true}
+                    disableAtMentions={true}
+                    disableChannelLink={true}
+                    autolinkedUrlSchemes={[]}
+                    mentionKeys={[]}
+                    navigator={navigator}
+                    theme={theme}
+                    value={name}
+                    baseTextStyle={style.text}
+                />
             </Button>
         );
     }
