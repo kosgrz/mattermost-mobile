@@ -2,12 +2,13 @@
 // See LICENSE.txt for license information.
 
 import React, {PureComponent} from 'react';
+import {Text} from 'react-native';
 import PropTypes from 'prop-types';
 import Button from 'react-native-button';
 
 import {preventDoubleTap} from 'app/utils/tap';
 import {makeStyleSheetFromTheme} from 'app/utils/theme';
-import Markdown from 'app/components/markdown';
+import MarkdownEmoji from 'app/components/markdown/markdown_emoji';
 
 export default class ActionButton extends PureComponent {
     static propTypes = {
@@ -18,6 +19,7 @@ export default class ActionButton extends PureComponent {
         name: PropTypes.string.isRequired,
         postId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
+        hasAnyEmojis: PropTypes.bool.isRequired,
     };
 
     handleActionPress = preventDoubleTap(() => {
@@ -26,27 +28,28 @@ export default class ActionButton extends PureComponent {
     });
 
     render() {
-        const {name, theme} = this.props;
+        const {name, theme, hasAnyEmojis} = this.props;
         const style = getStyleSheet(theme);
+        let buttonContent;
+        if (hasAnyEmojis) {
+            buttonContent = (
+                <MarkdownEmoji
+                    baseTextStyle={style.text}
+                    shouldRenderJumboEmoji={false}
+                    isEdited={false}
+                    value={name}
+                />
+            );
+        } else {
+            buttonContent = <Text style={style.text}>{name}</Text>;
+        }
 
         return (
             <Button
                 containerStyle={style.button}
                 onPress={this.handleActionPress}
             >
-                <Markdown
-                    isEdited={false}
-                    isReplyPost={false}
-                    disableHashtags={true}
-                    disableAtMentions={true}
-                    disableChannelLink={true}
-                    autolinkedUrlSchemes={[]}
-                    mentionKeys={[]}
-                    navigator={navigator}
-                    theme={theme}
-                    value={name}
-                    baseTextStyle={style.text}
-                />
+                {buttonContent}
             </Button>
         );
     }
@@ -68,6 +71,7 @@ const getStyleSheet = makeStyleSheetFromTheme((theme) => {
             color: theme.buttonColor,
             fontSize: 12,
             fontWeight: '600',
+            lineHeight: 12,
         },
     };
 });

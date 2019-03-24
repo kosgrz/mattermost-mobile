@@ -92,6 +92,42 @@ export function hasEmojisOnly(message, customEmojis) {
     };
 }
 
+export function hasAnyEmojis(message, customEmojis) {
+    if (!message || message.length === 0 || (/^\s{4}/).test(message)) {
+        return false;
+    }
+
+    const chunks = message.trim().split(' ').filter((m) => m && m.length > 0);
+
+    if (chunks.length === 0) {
+        return false;
+    }
+
+    for (const chunk of chunks) {
+        if (doesMatchNamedEmoji(chunk)) {
+            const emojiName = chunk.substring(1, chunk.length - 1);
+            if (EmojiIndicesByAlias.has(emojiName)) {
+                return true;
+            }
+
+            if (customEmojis && customEmojis.has(emojiName)) {
+                return true;
+            }
+        }
+
+        const matchUnicodeEmoji = chunk.match(RE_UNICODE_EMOJI);
+        if (matchUnicodeEmoji && matchUnicodeEmoji.join('') === chunk) {
+            return true;
+        }
+
+        if (isEmoticon(chunk)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function doesMatchNamedEmoji(emojiName) {
     const match = emojiName.match(RE_NAMED_EMOJI);
 

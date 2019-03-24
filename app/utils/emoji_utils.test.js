@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {doesMatchNamedEmoji, hasEmojisOnly} from './emoji_utils';
+import {doesMatchNamedEmoji, hasAnyEmojis, hasEmojisOnly} from './emoji_utils';
 
 describe('hasEmojisOnly with named emojis', () => {
     const testCases = [{
@@ -243,6 +243,214 @@ describe('hasEmojisOnly with empty and mixed emojis', () => {
     for (const testCase of testCases) {
         it(`${testCase.name} - ${testCase.message}`, () => {
             expect(hasEmojisOnly(testCase.message, customEmojis)).toEqual(testCase.expected);
+        });
+    }
+});
+
+describe('hasAnyEmojis with named emojis', () => {
+    const testCases = [{
+        name: 'Named emoji',
+        message: ':smile:',
+        expected: true,
+    }, {
+        name: 'Valid custom emoji',
+        message: ':valid_custom:',
+        expected: true,
+    }, {
+        name: 'Invalid custom emoji',
+        message: ':invalid_custom:',
+        expected: false,
+    }, {
+        name: 'Named emojis',
+        message: ':smile: :heart:',
+        expected: true,
+    }, {
+        name: 'Named emojis with white spaces',
+        message: '   :smile:    :heart:   ',
+        expected: true,
+    }, {
+        name: 'Named emojis with potential custom emojis',
+        message: ':smile: :heart: :valid_custom: :one:',
+        expected: true,
+    }, {
+        name: 'Not valid named emoji',
+        message: 'smile',
+        expected: false,
+    }, {
+        name: 'Not valid named emoji',
+        message: 'smile:',
+        expected: false,
+    }, {
+        name: 'Not valid named emoji',
+        message: ':smile',
+        expected: false,
+    }, {
+        name: 'Not valid named emoji',
+        message: ':smile::',
+        expected: false,
+    }, {
+        name: 'Not valid named emoji',
+        message: '::smile:',
+        expected: false,
+    }, {
+        name: 'Mixed valid and invalid named emojis',
+        message: '   :smile:  invalid  :heart:   ',
+        expected: true,
+    }];
+
+    const customEmojis = new Map([['valid_custom', 0]]);
+    for (const testCase of testCases) {
+        it(`${testCase.name} - ${testCase.message}`, () => {
+            expect(hasAnyEmojis(testCase.message, customEmojis)).toEqual(testCase.expected);
+        });
+    }
+});
+
+describe('hasAnyEmojis with unicode emojis', () => {
+    const testCases = [{
+        name: 'Unicode emoji',
+        message: '👍',
+        expected: true,
+    }, {
+        name: 'Unicode emoji',
+        message: '🙌',
+        expected: true,
+    }, {
+        name: 'Unicode emoji',
+        message: '🤟',
+        expected: true,
+    }, {
+        name: 'Unicode emojis',
+        message: '🙌 👏',
+        expected: true,
+    }, {
+        name: 'Unicode emojis without whitespace in between',
+        message: '🙌👏',
+        expected: true,
+    }, {
+        name: 'Unicode emojis without whitespace in between',
+        message: '🙌🤟',
+        expected: true,
+    }, {
+        name: 'Unicode emojis with white spaces',
+        message: '  😣   😖  ',
+        expected: true,
+    }, {
+        name: 'Unicode emojis with white spaces',
+        message: '  😣   🤟  ',
+        expected: true,
+    }, {
+        name: 'Unicode emoji',
+        message: '\ud83d\udd5f',
+        expected: true,
+    }, {
+        name: 'Not valid unicode emoji',
+        message: '\ud83d\udd5fnotvalid',
+        expected: false,
+    }, {
+        name: 'Mixed valid and invalid unicode emojis',
+        message: '😣 invalid 😖',
+        expected: true,
+    }];
+
+    const customEmojis = new Map();
+    for (const testCase of testCases) {
+        it(`${testCase.name} - ${testCase.message}`, () => {
+            expect(hasAnyEmojis(testCase.message, customEmojis)).toEqual(testCase.expected);
+        });
+    }
+});
+
+describe('hasAnyEmojis with emoticons', () => {
+    const testCases = [{
+        name: 'Emoticon',
+        message: ':)',
+        expected: true,
+    }, {
+        name: 'Emoticon',
+        message: ':+1:',
+        expected: true,
+    }, {
+        name: 'Emoticons',
+        message: ':) :-o',
+        expected: true,
+    }, {
+        name: 'Emoticons with white spaces',
+        message: '   :)    :-o   ',
+        expected: true,
+    }, {
+        name: '4 emoticons',
+        message: ':) :-o :+1: :|',
+        expected: true,
+    }, {
+        name: 'Not valid emoticon',
+        message: ':|:p',
+        expected: false,
+    }, {
+        name: 'Not valid named emoji',
+        message: ':) :-o :+1::|',
+        expected: true,
+    }, {
+        name: 'Mixed valid and invalid named emojis',
+        message: ':) :-o invalid :|',
+        expected: true,
+    }];
+
+    const customEmojis = new Map();
+    for (const testCase of testCases) {
+        it(`${testCase.name} - ${testCase.message}`, () => {
+            expect(hasAnyEmojis(testCase.message, customEmojis)).toEqual(testCase.expected);
+        });
+    }
+});
+
+describe('hasAnyEmojis with empty and mixed emojis', () => {
+    const testCases = [{
+        name: 'not with empty message',
+        message: '',
+        expected: false,
+    }, {
+        name: 'not with empty message',
+        message: '   ',
+        expected: false,
+    }, {
+        name: 'not with no emoji pattern',
+        message: 'smile',
+        expected: false,
+    }, {
+        name: 'with invalid custom emoji',
+        message: ':smile: :) :invalid_custom:',
+        expected: true,
+    }, {
+        name: 'with named emoji and emoticon',
+        message: ':smile: :) :valid_custom:',
+        expected: true,
+    }, {
+        name: 'with unicode emoji and emoticon',
+        message: '👍 :)',
+        expected: true,
+    }, {
+        name: 'with unicode emoji and emoticon',
+        message: '🤟 :)',
+        expected: true,
+    }, {
+        name: 'with named and unicode emojis',
+        message: ':smile: 👍',
+        expected: true,
+    }, {
+        name: 'with named and unicode emojis',
+        message: ':smile: 🤟',
+        expected: true,
+    }, {
+        name: 'with named & unicode emojis and emoticon',
+        message: ':smile: 👍 :)',
+        expected: true,
+    }];
+
+    const customEmojis = new Map([['valid_custom', 0]]);
+    for (const testCase of testCases) {
+        it(`${testCase.name} - ${testCase.message}`, () => {
+            expect(hasAnyEmojis(testCase.message, customEmojis)).toEqual(testCase.expected);
         });
     }
 });

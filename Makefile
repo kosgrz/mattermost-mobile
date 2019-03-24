@@ -154,7 +154,7 @@ run-ios: | check-device-ios pre-run ## Runs the app on an iOS simulator
 		fi; \
 	fi
 
-run-android: | check-device-android pre-run prepare-android-build ## Runs the app on an Android emulator or dev device
+run-android: | pre-run prepare-android-build ## Runs the app on an Android emulator or dev device
 	@if [ $(shell ps -ef | grep -i "cli.js start" | grep -civ grep) -eq 0 ]; then \
         echo Starting React Native packager server; \
     	npm start & echo Running Android app in development; \
